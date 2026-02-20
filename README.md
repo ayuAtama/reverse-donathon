@@ -1,6 +1,6 @@
 # Donation Countdown Timer
 
-A real-time donation countdown timer for Indonesian live-streamers. When viewers donate via [Saweria](https://saweria.co), the countdown ticks down. When it hits zero, confetti and a celebration sound fire off on stream.
+A real-time donation countdown timer for myself. When viewers donate via [Tako](https://tako.id/AyuAtama), the countdown ticks down. When it hits zero, confetti and a celebration sound fire off on stream.
 
 Built to be used as an **OBS Browser Source** overlay or as a standalone countdown page.
 
@@ -8,7 +8,7 @@ Built to be used as an **OBS Browser Source** overlay or as a standalone countdo
 
 ## How It Works
 
-1. **Saweria sends a webhook** to `/api/webhook` every time a donation comes in.
+1. **Tako sends a webhook** to `/api/webhook` every time a donation comes in.
 2. The server calculates how many seconds to subtract based on the donation amount and your configured rate (e.g. Rp 1,000 per 9 minutes).
 3. The countdown target datetime is reduced accordingly and saved to a local JSON file.
 4. The countdown page and OBS overlay poll the `/api/countdown` endpoint every second and display the updated timer.
@@ -33,7 +33,7 @@ Built to be used as an **OBS Browser Source** overlay or as a standalone countdo
 
 | Method | Route | Description |
 | --- | --- | --- |
-| `POST` `GET` `PUT` `PATCH` `DELETE` | `/api/webhook` | Receives Saweria webhook payloads and reduces the countdown |
+| `POST` `GET` `PUT` `PATCH` `DELETE` | `/api/webhook` | Receives Tako webhook payloads and reduces the countdown |
 | `GET` | `/api/countdown` | Returns current countdown state (remaining seconds, formatted time, percentage, last donation) |
 | `GET` | `/api/admin` | Returns current admin state (requires Bearer token) |
 | `PATCH` | `/api/admin` | Updates target datetime, rpPerUnit, or secondsPerUnit (requires Bearer token) |
@@ -93,7 +93,7 @@ Then edit `.env.local` with your actual configuration. See `.env.example` for de
 pnpm dev
 ```
 
-### 4. Configure Saweria webhook
+### 4. Configure Tako webhook
 
 In your Saweria dashboard, set the webhook URL to:
 
