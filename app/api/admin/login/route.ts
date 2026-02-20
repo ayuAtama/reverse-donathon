@@ -7,24 +7,18 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as { password: string };
 
     if (!body.password || !ADMIN_PASSWORD) {
-      return NextResponse.json(
-        { error: "Invalid password" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
     if (body.password === ADMIN_PASSWORD) {
       return NextResponse.json({ success: true, token: ADMIN_PASSWORD });
     }
 
-    return NextResponse.json(
-      { error: "Invalid password" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Invalid password" }, { status: 401 });
   } catch {
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
