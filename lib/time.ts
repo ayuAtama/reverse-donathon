@@ -39,18 +39,17 @@ export function remainingSeconds(targetAt: string): number {
 }
 
 /**
- * Calculate reduction in seconds based on amount, rpPerUnit, and timeUnit.
+ * Calculate reduction in seconds based on amount, rpPerUnit, and secondsPerUnit.
+ * Example: amount=5000, rpPerUnit=1000, secondsPerUnit=540 (9 min)
+ *   => units = 5, reduction = 5 * 540 = 2700 seconds
  */
 export function calculateReductionSeconds(
   amount: number,
   rpPerUnit: number,
-  timeUnit: "seconds" | "minutes"
+  secondsPerUnit: number
 ): number {
   const units = Math.floor(amount / rpPerUnit);
-  if (timeUnit === "minutes") {
-    return units * 60;
-  }
-  return units;
+  return units * secondsPerUnit;
 }
 
 /**
@@ -82,8 +81,32 @@ export function formatJakarta(dateStr: string): string {
 }
 
 /**
+ * Format secondsPerUnit into a human-readable string.
+ * e.g. 540 => "9 minutes", 90 => "1 minute 30 seconds", 1 => "1 second"
+ */
+export function formatSecondsPerUnit(totalSeconds: number): string {
+  if (totalSeconds <= 0) return "0 seconds";
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  const parts: string[] = [];
+  if (minutes > 0) {
+    parts.push(`${minutes} ${minutes === 1 ? "minute" : "minutes"}`);
+  }
+  if (seconds > 0) {
+    parts.push(`${seconds} ${seconds === 1 ? "second" : "seconds"}`);
+  }
+  return parts.join(" ");
+}
+
+/**
  * Calculate percentage remaining based on initial target and current target.
- * 100% = full time remaining, 0% = time is up.
+ * 100% = full time remaining (now === when countdown was set), 0% = time is up.
+ *
+ * initialTargetAt is reset to match targetAt whenever the admin changes the
+ * target datetime, so the "total window" is always initialTargetAt - now_at_reset.
+ * Since we don't store the reset moment, we use the full span from now to
+ * initialTargetAt as the denominator: pct = remaining / totalWindowFromNow.
+ * This gives a linear countdown from ~100% down to 0%.
  */
 export function percentageRemaining(
   initialTargetAt: string,
@@ -93,7 +116,9 @@ export function percentageRemaining(
   const initialTarget = new Date(initialTargetAt).getTime();
   const currentTarget = new Date(targetAt).getTime();
 
+  // Total window: from now to the initial (full) target
   const totalDuration = initialTarget - currentTime;
+  // Remaining window: from now to the current (reduced) target
   const remainingDuration = currentTarget - currentTime;
 
   if (totalDuration <= 0) return 0;

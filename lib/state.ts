@@ -5,28 +5,36 @@ import { stateMutex } from "./mutex";
 const DATA_DIR = path.join(process.cwd(), "data");
 const STATE_FILE = path.join(DATA_DIR, "state.json");
 
+export interface LastDonation {
+  id: string;
+  gifterName: string;
+  amount: number;
+  reductionSeconds: number;
+  timestamp: string;
+}
+
 export interface AppState {
   targetAt: string;
   initialTargetAt: string;
   rpPerUnit: number;
-  timeUnit: "seconds" | "minutes";
+  secondsPerUnit: number;
   lastProcessedWebhookIds: string[];
+  lastDonation: LastDonation | null;
 }
 
 function getDefaults(): AppState {
   const initialTarget =
     process.env.INITIAL_TARGET_DATETIME || "2026-02-28T15:00:00+07:00";
   const rpPerUnit = parseInt(process.env.RP_PER_UNIT || "1000", 10);
-  const timeUnitRaw = process.env.TIME_UNIT || "seconds";
-  const timeUnit: "seconds" | "minutes" =
-    timeUnitRaw === "minutes" ? "minutes" : "seconds";
+  const secondsPerUnit = parseInt(process.env.SECONDS_PER_UNIT || "60", 10);
 
   return {
     targetAt: new Date(initialTarget).toISOString(),
     initialTargetAt: new Date(initialTarget).toISOString(),
     rpPerUnit,
-    timeUnit,
+    secondsPerUnit,
     lastProcessedWebhookIds: [],
+    lastDonation: null,
   };
 }
 
@@ -49,7 +57,17 @@ export async function readState(): Promise<AppState> {
   }
 
   const raw = fs.readFileSync(STATE_FILE, "utf-8");
-  return JSON.parse(raw) as AppState;
+  const parsed = JSON.parse(raw) as AppState;
+
+  // Migrate old state files that used timeUnit instead of secondsPerUnit
+  if ((parsed as Record<string, unknown>)["timeUnit"] !== undefined && parsed.secondsPerUnit === undefined) {
+    const oldUnit = (parsed as Record<string, unknown>)["timeUnit"] as string;
+    parsed.secondsPerUnit = oldUnit === "minutes" ? 60 : 1;
+    delete (parsed as Record<string, unknown>)["timeUnit"];
+    await writeStateUnsafe(parsed);
+  }
+
+  return parsed;
 }
 
 /**

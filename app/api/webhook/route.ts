@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { updateState, readState } from "@/lib/state";
 import {
   calculateReductionSeconds,
-  subtractSeconds,
   remainingSeconds,
   formatHHMMSS,
+  now,
 } from "@/lib/time";
 
 interface WebhookPayload {
@@ -72,7 +72,7 @@ async function handleWebhook(request: NextRequest): Promise<NextResponse> {
     const reductionSecs = calculateReductionSeconds(
       body.amount,
       currentState.rpPerUnit,
-      currentState.timeUnit
+      currentState.secondsPerUnit
     );
 
     const updatedState = await updateState((state) => {
@@ -81,7 +81,11 @@ async function handleWebhook(request: NextRequest): Promise<NextResponse> {
         return state;
       }
 
-      const newTargetAt = subtractSeconds(state.targetAt, reductionSecs);
+      const target = new Date(state.targetAt).getTime();
+      const reduced = target - reductionSecs * 1000;
+      const current = now().getTime();
+      // If reduced time is at or before now, set target to now (immediately 0)
+      const newTargetAt = new Date(Math.max(reduced, current)).toISOString();
 
       const updatedIds = [...state.lastProcessedWebhookIds, body.id];
       if (updatedIds.length > 100) {
@@ -92,6 +96,13 @@ async function handleWebhook(request: NextRequest): Promise<NextResponse> {
         ...state,
         targetAt: newTargetAt,
         lastProcessedWebhookIds: updatedIds,
+        lastDonation: {
+          id: body.id,
+          gifterName: body.gifterName || "Anonymous",
+          amount: body.amount,
+          reductionSeconds: reductionSecs,
+          timestamp: new Date().toISOString(),
+        },
       };
     });
 

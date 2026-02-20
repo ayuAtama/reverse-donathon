@@ -4,6 +4,7 @@ import {
   remainingSeconds,
   formatHHMMSS,
   percentageRemaining,
+  formatSecondsPerUnit,
 } from "@/lib/time";
 
 export async function GET() {
@@ -18,7 +19,9 @@ export async function GET() {
       formattedHHMMSS: formatHHMMSS(remaining),
       percentageRemaining: pct,
       rpPerUnit: state.rpPerUnit,
-      timeUnit: state.timeUnit,
+      secondsPerUnit: state.secondsPerUnit,
+      rateLabel: `Rp ${state.rpPerUnit.toLocaleString("id-ID")} / ${formatSecondsPerUnit(state.secondsPerUnit)}`,
+      lastDonation: state.lastDonation,
     });
   } catch (error) {
     console.error("Countdown error:", error);
