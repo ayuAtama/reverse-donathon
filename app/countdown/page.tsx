@@ -164,6 +164,12 @@ export default function CountdownPage() {
         prevRemainingRef.current > 0 &&
         json.remainingSeconds === 0
       ) {
+        // Stop donation effect immediately
+        if (donationTimerRef.current) {
+          clearTimeout(donationTimerRef.current);
+          donationTimerRef.current = null;
+        }
+        setDonationEffect(null);
         fireCelebration();
       }
       prevRemainingRef.current = json.remainingSeconds;
