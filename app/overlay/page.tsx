@@ -41,6 +41,8 @@ function OverlayContent() {
   const [celebrated, setCelebrated] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const prevRemainingRef = useRef<number | null>(null);
+  const isEffectActiveRef = useRef(false);
+  const hasSyncedRef = useRef(false);
 
   // Donation effect state
   const [donationEffect, setDonationEffect] = useState<{
@@ -57,7 +59,7 @@ function OverlayContent() {
 
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => { });
+      audioRef.current.play().catch(() => {});
     }
 
     import("canvas-confetti").then((mod) => {
@@ -71,14 +73,28 @@ function OverlayContent() {
           angle: 60,
           spread: 65,
           origin: { x: 0, y: 0.6 },
-          colors: ["#ff0000", "#ff9900", "#ffff00", "#33cc33", "#0099ff", "#9933ff"],
+          colors: [
+            "#ff0000",
+            "#ff9900",
+            "#ffff00",
+            "#33cc33",
+            "#0099ff",
+            "#9933ff",
+          ],
         });
         fire({
           particleCount: 6,
           angle: 120,
           spread: 65,
           origin: { x: 1, y: 0.6 },
-          colors: ["#ff0000", "#ff9900", "#ffff00", "#33cc33", "#0099ff", "#9933ff"],
+          colors: [
+            "#ff0000",
+            "#ff9900",
+            "#ffff00",
+            "#33cc33",
+            "#0099ff",
+            "#9933ff",
+          ],
         });
 
         if (Date.now() < end) {
@@ -89,25 +105,22 @@ function OverlayContent() {
     });
   }, [celebrated]);
 
-  const showDonationEffect = useCallback(
-    (donation: LastDonation) => {
-      if (donationTimerRef.current) {
-        clearTimeout(donationTimerRef.current);
-      }
+  const showDonationEffect = useCallback((donation: LastDonation) => {
+    if (isEffectActiveRef.current) return;
+    isEffectActiveRef.current = true;
 
-      setDonationEffect({
-        gifterName: donation.gifterName,
-        amount: donation.amount,
-        reductionText: formatReduction(donation.reductionSeconds),
-      });
+    setDonationEffect({
+      gifterName: donation.gifterName,
+      amount: donation.amount,
+      reductionText: formatReduction(donation.reductionSeconds),
+    });
 
-      donationTimerRef.current = setTimeout(() => {
-        setDonationEffect(null);
-        donationTimerRef.current = null;
-      }, 10000);
-    },
-    []
-  );
+    donationTimerRef.current = setTimeout(() => {
+      setDonationEffect(null);
+      isEffectActiveRef.current = false;
+      donationTimerRef.current = null;
+    }, 3000);
+  }, []);
 
   const fetchCountdown = useCallback(async () => {
     try {
@@ -116,15 +129,18 @@ function OverlayContent() {
       const json = (await res.json()) as CountdownData;
       setData(json);
 
-      // Detect new donation
-      if (
-        json.lastDonation &&
-        json.lastDonation.id !== lastSeenDonationIdRef.current
-      ) {
-        if (lastSeenDonationIdRef.current !== null) {
+      // Detect new donation safely
+      if (json.lastDonation) {
+        if (!hasSyncedRef.current) {
+          lastSeenDonationIdRef.current = json.lastDonation.id;
+          hasSyncedRef.current = true;
+        } else if (
+          json.lastDonation.id !== lastSeenDonationIdRef.current &&
+          json.remainingSeconds > 0 // 👈 CRITICAL GUARD
+        ) {
+          lastSeenDonationIdRef.current = json.lastDonation.id;
           showDonationEffect(json.lastDonation);
         }
-        lastSeenDonationIdRef.current = json.lastDonation.id;
       }
 
       // Detect transition to zero
@@ -160,34 +176,46 @@ function OverlayContent() {
   return (
     <div className="flex h-screen w-screen items-center justify-center relative">
       {/* Celebration sound */}
-      <audio
+      {/* <audio
         ref={audioRef}
-        src="https://cdn.freesound.org/previews/270/270402_5123451-lq.mp3"
+        src="https://www.myinstants.com/media/sounds/we-are-the-champions-copia.mp3"
         preload="auto"
-      />
+      /> */}
+      <audio ref={audioRef} preload="auto">
+        <source src="https://www.myinstants.com/media/sounds/queen-we-are-the-champions-chorus-only.mp3" />
+      </audio>
 
       {/* Donation blink overlay */}
       {donationEffect && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center animate-donation-blink">
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center animate-donation-blink bg-black/30 backdrop-blur-sm">
           <p
             className="font-mono text-xl tracking-wide"
-            style={{ color: "#ef4444", textShadow: "0 2px 12px rgba(0,0,0,0.9)" }}
+            style={{
+              color: "#ef4444",
+              textShadow: "0 2px 12px rgba(0,0,0,0.9)",
+            }}
           >
-            {donationEffect.gifterName} - Rp {donationEffect.amount.toLocaleString("id-ID")}
+            {donationEffect.gifterName} - Rp{" "}
+            {donationEffect.amount.toLocaleString("id-ID")}
           </p>
           <p
             className="font-mono text-6xl font-bold mt-2 sm:text-7xl lg:text-8xl"
-            style={{ color: "#ef4444", textShadow: "0 2px 12px rgba(0,0,0,0.9)" }}
+            style={{
+              color: "#ef4444",
+              textShadow: "0 2px 12px rgba(0,0,0,0.9)",
+            }}
           >
-            {"-"}{donationEffect.reductionText}
+            {"-"}
+            {donationEffect.reductionText}
           </p>
         </div>
       )}
 
       <div className="flex flex-col items-center gap-2">
         <span
-          className={`font-mono text-7xl font-bold tracking-widest sm:text-8xl lg:text-9xl ${isFinished ? "animate-pulse" : ""
-            }`}
+          className={`font-mono text-7xl font-bold tracking-widest sm:text-8xl lg:text-9xl ${
+            isFinished ? "animate-pulse" : ""
+          }`}
           style={{
             color: isFinished ? "#4ade80" : "#ffffff",
             textShadow: "0 2px 8px rgba(0,0,0,0.8)",
@@ -198,7 +226,10 @@ function OverlayContent() {
         {!minimal && (
           <span
             className="font-mono text-lg tracking-wide"
-            style={{ color: "rgba(255,255,255,0.7)" }}
+            style={{
+              color: "#ef4444",
+              textShadow: "0 2px 8px rgba(0,0,0,0.8)",
+            }}
           >
             {data.rateLabel}
           </span>
@@ -206,7 +237,10 @@ function OverlayContent() {
         {isFinished && (
           <span
             className="font-mono text-2xl font-bold tracking-wider animate-pulse"
-            style={{ color: "#4ade80", textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}
+            style={{
+              color: "#4ade80",
+              textShadow: "0 2px 8px rgba(0,0,0,0.8)",
+            }}
           >
             COMPLETE!
           </span>

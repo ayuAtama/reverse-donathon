@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     console.error("Admin GET error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -54,7 +54,7 @@ export async function PATCH(request: NextRequest) {
       if (isNaN(parsed.getTime())) {
         return NextResponse.json(
           { error: "Invalid targetAt datetime" },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -64,7 +64,7 @@ export async function PATCH(request: NextRequest) {
       if (typeof body.rpPerUnit !== "number" || body.rpPerUnit <= 0) {
         return NextResponse.json(
           { error: "rpPerUnit must be a positive number" },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -74,7 +74,7 @@ export async function PATCH(request: NextRequest) {
       if (typeof body.secondsPerUnit !== "number" || body.secondsPerUnit <= 0) {
         return NextResponse.json(
           { error: "secondsPerUnit must be a positive number" },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -113,7 +113,7 @@ export async function PATCH(request: NextRequest) {
     console.error("Admin PATCH error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

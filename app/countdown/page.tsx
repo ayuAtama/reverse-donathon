@@ -87,14 +87,28 @@ export default function CountdownPage() {
           angle: 60,
           spread: 55,
           origin: { x: 0, y: 0.7 },
-          colors: ["#ff0000", "#ff9900", "#ffff00", "#33cc33", "#0099ff", "#9933ff"],
+          colors: [
+            "#ff0000",
+            "#ff9900",
+            "#ffff00",
+            "#33cc33",
+            "#0099ff",
+            "#9933ff",
+          ],
         });
         fire({
           particleCount: 4,
           angle: 120,
           spread: 55,
           origin: { x: 1, y: 0.7 },
-          colors: ["#ff0000", "#ff9900", "#ffff00", "#33cc33", "#0099ff", "#9933ff"],
+          colors: [
+            "#ff0000",
+            "#ff9900",
+            "#ffff00",
+            "#33cc33",
+            "#0099ff",
+            "#9933ff",
+          ],
         });
 
         if (Date.now() < end) {
@@ -105,27 +119,24 @@ export default function CountdownPage() {
     });
   }, [celebrated]);
 
-  const showDonationEffect = useCallback(
-    (donation: LastDonation) => {
-      // Clear any existing timer
-      if (donationTimerRef.current) {
-        clearTimeout(donationTimerRef.current);
-      }
+  const showDonationEffect = useCallback((donation: LastDonation) => {
+    // Clear any existing timer
+    if (donationTimerRef.current) {
+      clearTimeout(donationTimerRef.current);
+    }
 
-      setDonationEffect({
-        gifterName: donation.gifterName,
-        amount: donation.amount,
-        reductionText: formatReduction(donation.reductionSeconds),
-      });
+    setDonationEffect({
+      gifterName: donation.gifterName,
+      amount: donation.amount,
+      reductionText: formatReduction(donation.reductionSeconds),
+    });
 
-      // Clear after 10 seconds
-      donationTimerRef.current = setTimeout(() => {
-        setDonationEffect(null);
-        donationTimerRef.current = null;
-      }, 10000);
-    },
-    []
-  );
+    // Clear after 10 seconds
+    donationTimerRef.current = setTimeout(() => {
+      setDonationEffect(null);
+      donationTimerRef.current = null;
+    }, 10000);
+  }, []);
 
   const fetchCountdown = useCallback(async () => {
     try {
@@ -183,27 +194,28 @@ export default function CountdownPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background p-4">
-      <audio
-        ref={audioRef}
-        src="https://cdn.freesound.org/previews/270/270402_5123451-lq.mp3"
-        preload="auto"
-      />
+      <audio ref={audioRef} preload="auto">
+        <source src="https://www.myinstants.com/media/sounds/we-are-the-champions-copia.mp3" />
+        <source src="/audio/fallback.mp3" />
+      </audio>
       <Card className="w-full max-w-lg relative overflow-hidden">
         {/* Donation blink effect */}
         {donationEffect && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/90 animate-donation-blink">
             <p className="text-sm font-medium text-muted-foreground">
-              {donationEffect.gifterName} donated Rp {donationEffect.amount.toLocaleString("id-ID")}
+              {donationEffect.gifterName} donated Rp{" "}
+              {donationEffect.amount.toLocaleString("id-ID")}
             </p>
             <p className="font-mono text-5xl font-bold text-red-500 mt-2 sm:text-6xl">
-              {"-"}{donationEffect.reductionText}
+              {"-"}
+              {donationEffect.reductionText}
             </p>
           </div>
         )}
 
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-foreground">
-            Donation Countdown
+            Speedrun Making Laundry Web App Challenge
           </CardTitle>
           <p className="text-sm text-muted-foreground">
             Every donation reduces the timer
@@ -275,6 +287,30 @@ export default function CountdownPage() {
                   </p>
                 </div>
               </div>
+              <a
+                href="https://tako.id/AyuAtama"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+    w-full
+    inline-flex
+    items-center
+    justify-center
+    rounded-md
+    bg-primary
+    px-4
+    py-3
+    text-sm
+    font-semibold
+    text-primary-foreground
+    transition-all
+    hover:opacity-90
+    active:scale-[0.98]
+    shadow-sm
+  "
+              >
+                Support & Reduce Timer
+              </a>
             </>
           )}
         </CardContent>
