@@ -10,9 +10,7 @@ export default function HomePage() {
           <CardTitle className="text-2xl font-bold text-foreground">
             Donation Countdown
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Choose a view
-          </p>
+          <p className="text-sm text-muted-foreground">Choose a view</p>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <Button asChild variant="default" className="w-full">
@@ -21,8 +19,16 @@ export default function HomePage() {
           <Button asChild variant="secondary" className="w-full">
             <Link href="/overlay">OBS Overlay</Link>
           </Button>
-          <Button asChild variant="outline" className="w-full">
+          <Button asChild variant="secondary" className="w-full">
+            <Link href="/subs-goals-no-api">Subs Goals Overlay</Link>
+          </Button>
+          <Button asChild variant="destructive" className="w-full">
             <Link href="/admin">Admin Panel</Link>
+          </Button>
+          <Button asChild variant="default" className="w-full">
+            <Link href="https://tako.id/ayuatama">
+              Support & Reduce the Countdown
+            </Link>
           </Button>
         </CardContent>
       </Card>

@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ArrowLeftIcon } from "lucide-react";
+import Link from "next/link";
 
 interface AdminState {
   targetAt: string;
@@ -51,11 +53,7 @@ function secondsToMinutesAndSeconds(totalSeconds: number): {
 }
 
 // --- Login Gate ---
-function LoginForm({
-  onLogin,
-}: {
-  onLogin: (token: string) => void;
-}) {
+function LoginForm({ onLogin }: { onLogin: (token: string) => void }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -152,7 +150,7 @@ function AdminPanel({ token }: { token: string }) {
       setTargetAtInput(toDatetimeLocalJakarta(json.targetAt));
       setRpPerUnitInput(json.rpPerUnit.toString());
       const { minutes, seconds } = secondsToMinutesAndSeconds(
-        json.secondsPerUnit
+        json.secondsPerUnit,
       );
       setUnitMinutes(minutes.toString());
       setUnitSeconds(seconds.toString());
@@ -221,6 +219,13 @@ function AdminPanel({ token }: { token: string }) {
     <main className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
+          {/* back button */}
+          <div className="z-10 flex items-center gap-2 ">
+            <Link href="/" className="flex items-center gap-2">
+              <ArrowLeftIcon />
+              <span>Home</span>
+            </Link>
+          </div>
           <CardTitle className="text-xl font-bold text-foreground">
             Admin Panel
           </CardTitle>
@@ -291,14 +296,17 @@ function AdminPanel({ token }: { token: string }) {
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 {"Current: Rp "}
-                {parseInt(rpPerUnitInput, 10).toLocaleString("id-ID") || "..."}{" "}
+                {parseInt(rpPerUnitInput, 10).toLocaleString("id-ID") ||
+                  "..."}{" "}
                 {" / "}
                 {(() => {
                   const m = parseInt(unitMinutes, 10) || 0;
                   const s = parseInt(unitSeconds, 10) || 0;
                   const parts: string[] = [];
-                  if (m > 0) parts.push(`${m} ${m === 1 ? "minute" : "minutes"}`);
-                  if (s > 0) parts.push(`${s} ${s === 1 ? "second" : "seconds"}`);
+                  if (m > 0)
+                    parts.push(`${m} ${m === 1 ? "minute" : "minutes"}`);
+                  if (s > 0)
+                    parts.push(`${s} ${s === 1 ? "second" : "seconds"}`);
                   return parts.length > 0 ? parts.join(" ") : "0 seconds";
                 })()}
               </p>

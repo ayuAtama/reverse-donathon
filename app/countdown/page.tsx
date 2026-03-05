@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import Link from "next/link";
+import { ArrowLeftIcon } from "lucide-react";
 
 interface LastDonation {
   id: string;
@@ -219,8 +221,16 @@ export default function CountdownPage() {
           </div>
         )}
 
+        {/* back button */}
+        <div className="absolute top-4 z-10left-4 flex items-center gap-2 ml-3">
+          <Link href="/" className="flex items-center gap-2">
+            <ArrowLeftIcon />
+          </Link>
+          <br />
+        </div>
+
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-foreground">
+          <CardTitle className="pt-5 text-2xl font-bold text-foreground">
             Speedrun Making Laundry Web App Challenge
           </CardTitle>
           <p className="text-sm text-muted-foreground">
